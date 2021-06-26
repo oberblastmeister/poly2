@@ -1,0 +1,11 @@
+(library
+ (name poly2)
+ (flags (:standard -warn-error -A))
+ (preprocess
+   (pps ppx_jane ppx_deriving.show ppx_deriving.eq))
+ (libraries core))
+
+(ocamllex lexer)
+
+(menhir
+  (modules parser))
