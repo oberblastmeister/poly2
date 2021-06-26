@@ -39,7 +39,7 @@ end
 type level = int [@@deriving show, eq, sexp]
 
 type t =
-  | TConst of name
+  | TCon of string
   | TApp of t * t list
   | TArr of t list * t
   | TVar of tvar
