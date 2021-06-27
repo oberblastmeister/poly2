@@ -51,7 +51,7 @@ ty_eof:
 
 ty:
   | i = IDENT { TCon i }
-  | LPAREN RPAREN ARROW t = ty { TArr ([], t) }
+  | LPAREN RPAREN { Unit }
   | t1 = ty ARROW t2 = ty { TArr ([t1], t2) }
   | t1 = ty_comma_list ARROW t2 = ty { TArr (t1, t2) }
 
