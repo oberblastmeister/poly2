@@ -26,6 +26,7 @@ rule token = parse
   | '[' { LBRACKET }
   | ']' { RBRACKET }
 
+  | "->" { ARROW }
   | '=' { ASSIGN }
   | "==" { EQUALS }
   | "!=" { NOTEQUALS }

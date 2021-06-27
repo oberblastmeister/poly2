@@ -1,5 +1,4 @@
 open Core
-open Expr
 
 module Id : sig
   type t [@@deriving show, eq, sexp]
@@ -47,3 +46,5 @@ type t =
 
 and tvar = Unbound of Id.t * level | Link of t | Generic of Id.t
 [@@deriving show, eq, sexp]
+
+let print t = print_endline (show t)

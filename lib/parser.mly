@@ -1,5 +1,6 @@
 %{
 open Expr
+open Type
 %}
 
 %token <string> IDENT
@@ -15,13 +16,15 @@ open Expr
 %left STAR SLASH
 %nonassoc UMINUS
 
-%start expr_eof
-%type <Expr.t> expr_eof
+%right ARROW
+
+%start <Expr.t> expr_eof
+%start <Type.t> ty_eof
 
 %%
 
 expr_eof:
-  | e = expr EOF { e }
+  e = expr EOF { e }
 
 expr:
   | LPAREN e = expr RPAREN { e }
@@ -43,5 +46,14 @@ bin:
 neg:
   MINUS e = expr %prec UMINUS { Neg e }
 
-(* t_lit: *)
-(*   | *) 
+ty_eof:
+  t = ty EOF { t }
+
+ty:
+  | i = IDENT { TCon i }
+  | LPAREN RPAREN ARROW t = ty { TArr ([], t) }
+  | t1 = ty ARROW t2 = ty { TArr ([t1], t2) }
+  | t1 = ty_comma_list ARROW t2 = ty { TArr (t1, t2) }
+
+ty_comma_list:
+  LPAREN tys = separated_list(COMMA, ty) RPAREN { tys }

@@ -1,8 +1,12 @@
 (library
  (name poly2)
+ (inline_tests)
  (flags (:standard -warn-error -A))
  (preprocess
-   (pps ppx_jane ppx_deriving.show ppx_deriving.eq))
+   (pps
+     ppx_jane
+     ppx_deriving.show
+     ppx_deriving.eq))
  (libraries core))
 
 (ocamllex lexer)
