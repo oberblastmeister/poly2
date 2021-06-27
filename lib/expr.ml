@@ -14,6 +14,6 @@ type t =
 
 and lit = LInt of int | LString of string [@@deriving show, eq, sexp]
 
-and bin_op = Add | Sub | Mul | Div [@@deriving show, eq, sexp]
+and bin_op = Add | Sub | Mul | Div | Eq | NotEq [@@deriving show, eq, sexp]
 
 let print t = show t |> print_endline

@@ -12,6 +12,7 @@ open Type
 %token PLUS MINUS STAR SLASH
 %token EOF
 
+%left EQUALS NOTEQUALS
 %left PLUS MINUS
 %left STAR SLASH
 %nonassoc UMINUS
@@ -28,6 +29,7 @@ expr_eof:
 
 expr:
   | LPAREN e = expr RPAREN { e }
+  | name = IDENT { Var name }
   | LET name = IDENT ASSIGN e1 = expr IN e2 = expr { Let (name, e1, e2) }
   | lit { $1 }
   | bin { $1 }
@@ -42,6 +44,8 @@ bin:
   | e1 = expr MINUS e2 = expr { Bin (Sub, e1, e2) }
   | e1 = expr STAR e2 = expr { Bin (Mul, e1, e2) }
   | e1 = expr SLASH e2 = expr { Bin (Div, e1, e2) }
+  | e1 = expr EQUALS e2 = expr { Bin (Eq, e1, e2) }
+  | e1 = expr NOTEQUALS e2 = expr { Bin (NotEq, e1, e2) }
 
 neg:
   MINUS e = expr %prec UMINUS { Neg e }

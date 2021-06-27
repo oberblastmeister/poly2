@@ -41,6 +41,24 @@ module Expr_tests = struct
     (Expr.Bin (Expr.Add, (Expr.Lit (Expr.LInt 1)),
        (Expr.Bin (Expr.Div, (Expr.Lit (Expr.LInt 3)), (Expr.Lit (Expr.LInt 2))))
        )) |}]
+
+  let%expect_test "variable" =
+    parse_expr "a_variable" |> Expr.print;
+    [%expect {| (Expr.Var "a_variable") |}]
+
+  let%expect_test "let" =
+    parse_expr {|
+    let x = 324 in
+    let y = "a string" in
+    x + x
+    |}
+    |> Expr.print;
+    [%expect
+      {|
+      (Expr.Let ("x", (Expr.Lit (Expr.LInt 324)),
+         (Expr.Let ("y", (Expr.Lit (Expr.LString "a string")),
+            (Expr.Bin (Expr.Add, (Expr.Var "x"), (Expr.Var "x")))))
+         )) |}]
 end
 
 module Type_tests = struct
