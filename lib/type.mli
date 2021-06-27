@@ -2,12 +2,10 @@ open Core
 
 type level = int [@@deriving show, eq, sexp]
 
-module Unique = struct
-  include Unique_id.Int63 ()
+module Unique : sig
+  type t
 
-  let show = to_string
-
-  let pp f t = Format.pp_print_string f (show t)
+  include Comparable with type t := t
 end
 
 type t =
@@ -18,11 +16,13 @@ type t =
   | TVar of tvar ref
 [@@deriving show, eq, sexp]
 
+(* include Equal.S with type t := t *)
+
 and tvar = Unbound of Unique.t * level | Link of t | Generic of Unique.t
 [@@deriving show, eq, sexp]
 
-let new_var level = TVar (ref (Unbound (Unique.create (), level)))
+val print : t -> unit
 
-let new_gen_var () = TVar (ref (Generic (Unique.create ())))
+val new_var : level -> t
 
-let print = Fn.compose print_endline show
+val new_gen_var : unit -> t

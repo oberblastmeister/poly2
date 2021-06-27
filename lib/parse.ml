@@ -1,5 +1,3 @@
-open Parser
-
 type lexer = Lexing.lexbuf -> Parser.token
 
 type 'a parser = lexer -> Lexing.lexbuf -> 'a
