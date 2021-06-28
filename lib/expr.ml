@@ -1,6 +1,6 @@
 open Core
 
-type name = string [@@deriving show, eq, sexp]
+type name = string [@@deriving show, equal, compare, sexp]
 
 type t =
   | Var of name
@@ -11,11 +11,11 @@ type t =
   | Neg of t
   | Lit of lit
   | Unit
-[@@deriving show, eq, sexp]
+[@@deriving show, equal, compare, sexp]
 
 and lit = LInt of int | LString of string | LBool of bool
-[@@deriving show, eq, sexp]
+[@@deriving show, compare, sexp]
 
-and bin_op = Add | Sub | Mul | Div | Eq | NotEq [@@deriving show, eq, sexp]
+and bin_op = Add | Sub | Mul | Div | Eq | NotEq [@@deriving show, equal, compare, sexp]
 
 let print t = show t |> print_endline

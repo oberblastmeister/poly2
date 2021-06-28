@@ -1,3 +1,3 @@
-val todo : _
+val todo : unit -> _
 
-val unreachable : _
+val unreachable : unit -> _

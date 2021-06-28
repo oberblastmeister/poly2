@@ -64,34 +64,34 @@ end
 module Type_tests = struct
   let%expect_test "t con" =
     parse_type "String" |> Type.print;
-    [%expect {| (Type.TCon "String") |}]
+    [%expect {| (Type.Con "String") |}]
 
   let%expect_test "unit" =
     parse_type "()" |> Type.print;
-    [%expect {| Type.TUnit |}]
+    [%expect {| Type.Unit |}]
 
   let%expect_test "arrow type" =
     parse_type "(String, Int, Bool) -> String" |> Type.print;
     [%expect
       {|
-      (Type.TArr ([(Type.TCon "String"); (Type.TCon "Int"); (Type.TCon "Bool")],
-         (Type.TCon "String"))) |}]
+      (Type.Arr ([(Type.Con "String"); (Type.Con "Int"); (Type.Con "Bool")],
+         (Type.Con "String"))) |}]
 
   let%expect_test "arrow type unit" =
     parse_type "() -> String" |> Type.print;
-    [%expect {| (Type.TArr ([Type.TUnit], (Type.TCon "String"))) |}];
+    [%expect {| (Type.Arr ([Type.Unit], (Type.Con "String"))) |}];
 
     parse_type "String -> () -> ()" |> Type.print;
     [%expect
-      {| (Type.TArr ([(Type.TCon "String")], (Type.TArr ([Type.TUnit], Type.TUnit)))) |}]
+      {| (Type.Arr ([(Type.Con "String")], (Type.Arr ([Type.Unit], Type.Unit)))) |}]
 
   let%expect_test "arrow type assoc correct" =
     parse_type "String -> Int -> String -> Bool" |> Type.print;
     [%expect
       {|
-      (Type.TArr ([(Type.TCon "String")],
-         (Type.TArr ([(Type.TCon "Int")],
-            (Type.TArr ([(Type.TCon "String")], (Type.TCon "Bool")))))
+      (Type.Arr ([(Type.Con "String")],
+         (Type.Arr ([(Type.Con "Int")],
+            (Type.Arr ([(Type.Con "String")], (Type.Con "Bool")))))
          )) |}]
 
   let%expect_test "arrow type assoc with parens" =
@@ -99,10 +99,10 @@ module Type_tests = struct
     |> Type.print;
     [%expect
       {|
-      (Type.TArr ([(Type.TArr ([(Type.TCon "String")], (Type.TCon "Int")))],
-         (Type.TArr ([(Type.TCon "Bool")],
-            (Type.TArr ([(Type.TArr ([(Type.TCon "String")], (Type.TCon "Bool")))],
-               (Type.TCon "String")))
+      (Type.Arr ([(Type.Arr ([(Type.Con "String")], (Type.Con "Int")))],
+         (Type.Arr ([(Type.Con "Bool")],
+            (Type.Arr ([(Type.Arr ([(Type.Con "String")], (Type.Con "Bool")))],
+               (Type.Con "String")))
             ))
          )) |}]
 end

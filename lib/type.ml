@@ -1,6 +1,6 @@
 open Core
 
-type level = int [@@deriving show, eq, sexp]
+type level = int [@@deriving show, compare, equal, sexp]
 
 module VarId = struct
   include Unique_id.Int63 ()
@@ -13,8 +13,12 @@ end
 type t = Unit | Con of string | Arr of t list * t | Var of tvar ref
 [@@deriving show, eq, sexp]
 
-and tvar = Unbound of VarId.t * level | Link of t | Generic of VarId.t
-[@@deriving show, eq, sexp]
+and tvar =
+  | Unbound of VarId.t * level
+  | Link of t
+  | Generic of VarId.t
+  | Named of Expr.name
+[@@deriving show, compare, equal, sexp]
 
 let string_con = Con "String"
 

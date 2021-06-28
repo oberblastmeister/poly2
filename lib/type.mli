@@ -12,7 +12,11 @@ type t = Unit | Con of string | Arr of t list * t | Var of tvar ref
 [@@deriving show, eq, sexp]
 
 (* include Equal.S with type t := t *)
-and tvar = Unbound of VarId.t * level | Link of t | Generic of VarId.t
+and tvar =
+  | Unbound of VarId.t * level
+  | Link of t
+  | Generic of VarId.t
+  | Named of Expr.name
 [@@deriving show, eq, sexp]
 
 val string_con : t

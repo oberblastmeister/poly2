@@ -54,7 +54,7 @@ let occurs_check_adjust_levels tvar_id tvar_level ty =
   let open Result.Let_syntax in
   let rec f = function
     | Type.Var { contents = Type.Link ty } -> f ty
-    | Type.Var { contents = Type.Generic _ } -> unreachable
+    | Type.Var { contents = Type.Generic _ } -> unreachable ()
     | Type.Var
         ({ contents = Type.Unbound (other_id, other_level) } as other_tvar) ->
         if Type.VarId.(other_id = tvar_id) then Error `RecursiveTypes
