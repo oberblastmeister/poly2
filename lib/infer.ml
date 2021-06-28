@@ -32,7 +32,9 @@ module Error = struct
   type t =
     [ `RecursiveTypes
     | `Unification of Type.t * Type.t
-    | `UnboundVariable of Expr.name ]
+    | `UnboundVariable of Expr.name
+    | `UnexpectedNumArgs of int
+    | `NotFunction ]
   [@@deriving show, eq]
 end
 
@@ -67,6 +69,17 @@ let rec unify t1 t2 =
         List_ext.iter_result2 param_ty_list1 param_ty_list2 ~f:unify
       in
       unify return_ty1 return_ty2
+  | Type.Var { contents = Type.Link ty1 }, ty2
+  | ty1, Type.Var { contents = Type.Link ty2 } ->
+      unify ty1 ty2
+  | ( Type.Var { contents = Type.Unbound (id1, _) },
+      Type.Var { contents = Type.Unbound (id2, _) } )
+    when Type.VarId.(id1 = id2) ->
+      assert false
+      (* There is only a single instance of a particular type variable. *)
+  | ty, Type.Var ({ contents = Type.Unbound (id, level) } as tvar) ->
+      let%map () = occurs_check_adjust_levels id level ty in
+      tvar := Link ty
   | _ -> Error (`Unification (t1, t2))
 
 let rec generalize level = function
@@ -101,11 +114,29 @@ let instantiate level ty =
 
   f ty
 
+let rec match_fun_ty num_params = function
+  | Type.Arr (param_ty_list, return_ty) ->
+      let argc = List.length param_ty_list in
+      if argc <> num_params then Error (`UnexpectedNumArgs argc)
+      else Ok (param_ty_list, return_ty)
+  | Type.Var { contents = Type.Link ty } -> match_fun_ty num_params ty
+  | Type.Var ({ contents = Type.Unbound (_id, level) } as tvar) ->
+      let param_ty_list =
+        List.range 0 num_params |> List.map ~f:(fun _ -> Type.new_var level)
+      in
+      let return_ty = Type.new_var level in
+      tvar := Type.Link (Type.Arr (param_ty_list, return_ty));
+      Ok (param_ty_list, return_ty)
+  | _ -> Error `NotFunction
+
 let rec infer env level =
   let open Result.Let_syntax in
   function
   | Expr.Var name ->
-      Env.lookup env name |> Result.of_option ~error:(`UnboundVariable name)
+      let%bind ty =
+        Env.lookup env name |> Result.of_option ~error:(`UnboundVariable name)
+      in
+      instantiate level ty |> Ok
   | Expr.Fun (param_list, body_expr) ->
       let param_ty_list =
         List.map param_list ~f:(fun _ -> Type.new_var level)
@@ -120,3 +151,17 @@ let rec infer env level =
       let%bind var_ty = infer env (level + 1) value in
       let generalized = generalize level var_ty in
       infer (Env.extend env var_name generalized) level body
+  | Expr.Call (fn, arg_list) ->
+      let%bind fn_ty = infer env level fn in
+      let%bind param_ty_list, return_ty =
+        match_fun_ty (List.length arg_list) fn_ty
+      in
+      let%bind () =
+        List_ext.iter_result2 param_ty_list arg_list
+          ~f:(fun param_ty arg_expr ->
+            let%bind arg_ty = infer env level arg_expr in
+            unify param_ty arg_ty)
+      in
+
+      Ok return_ty
+  | _ -> raise Todo
