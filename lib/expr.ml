@@ -10,9 +10,11 @@ type t =
   | Bin of bin_op * t * t
   | Neg of t
   | Lit of lit
+  | Unit
 [@@deriving show, eq, sexp]
 
-and lit = LInt of int | LString of string [@@deriving show, eq, sexp]
+and lit = LInt of int | LString of string | LBool of bool
+[@@deriving show, eq, sexp]
 
 and bin_op = Add | Sub | Mul | Div | Eq | NotEq [@@deriving show, eq, sexp]
 

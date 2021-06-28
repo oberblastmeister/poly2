@@ -7,7 +7,7 @@ end
 module Error : sig
   type t =
     [ `RecursiveTypes
-    | `Unification of Type.t * Type.t
+    | `UnificationFail of Type.t * Type.t
     | `UnboundVariable of Expr.name
     | `UnexpectedNumArgs of int
     | `NotFunction ]

@@ -1,3 +1,3 @@
-exception Todo
+val todo : _
 
-exception Unreachable
+val unreachable : _

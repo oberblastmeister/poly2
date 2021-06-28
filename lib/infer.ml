@@ -31,18 +31,30 @@ end
 module Error = struct
   type t =
     [ `RecursiveTypes
-    | `Unification of Type.t * Type.t
+    | `UnificationFail of Type.t * Type.t
     | `UnboundVariable of Expr.name
     | `UnexpectedNumArgs of int
     | `NotFunction ]
-  [@@deriving show, eq]
+  [@@deriving eq]
+
+  let pp f =
+    let open Fmt in
+    function
+    | `RecursiveTypes -> pf f "Recursive types"
+    | `UnificationFail (t1, t2) ->
+        pf f "Failed to unify type %a with type %a" Type.pp t1 Type.pp t2
+    | `UnboundVariable name -> pf f "Unbound variable %s" name
+    | `UnexpectedNumArgs n -> pf f "Unexpected number of arguments %d" n
+    | `NotFunction -> pf f "It was not a function"
+
+  let show = Fmt.str "%a" pp
 end
 
-let occurs_check_adjust_levels (tvar_id : Type.VarId.t) tvar_level ty =
+let occurs_check_adjust_levels tvar_id tvar_level ty =
   let open Result.Let_syntax in
   let rec f = function
     | Type.Var { contents = Type.Link ty } -> f ty
-    | Type.Var { contents = Type.Generic _ } -> raise Unreachable
+    | Type.Var { contents = Type.Generic _ } -> unreachable
     | Type.Var
         ({ contents = Type.Unbound (other_id, other_level) } as other_tvar) ->
         if Type.VarId.(other_id = tvar_id) then Error `RecursiveTypes
@@ -80,7 +92,7 @@ let rec unify t1 t2 =
   | ty, Type.Var ({ contents = Type.Unbound (id, level) } as tvar) ->
       let%map () = occurs_check_adjust_levels id level ty in
       tvar := Link ty
-  | _ -> Error (`Unification (t1, t2))
+  | _ -> Error (`UnificationFail (t1, t2))
 
 let rec generalize level = function
   | Type.Var { contents = Type.Unbound (id, other_level) }
@@ -164,4 +176,28 @@ let rec infer env level =
       in
 
       Ok return_ty
-  | _ -> raise Todo
+  | Expr.Lit l -> Ok (infer_lit l)
+  | Expr.Unit -> Ok Type.Unit
+  | Expr.Bin (op, t1, t2) -> infer_bin env level op t1 t2
+  | Expr.Neg e ->
+      let%bind t = infer env level e in
+      let%bind () = unify t Type.int_con in
+      Ok Type.int_con
+
+and infer_lit = function
+  | Expr.LInt _ -> Type.int_con
+  | Expr.LString _ -> Type.string_con
+  | Expr.LBool _ -> Type.bool_con
+
+and fun_ty_of_bin_op = function
+  | Expr.Add | Expr.Sub | Expr.Div | Expr.Mul -> Type.int_op_ty
+  | Expr.Eq | Expr.NotEq -> Type.int_bool_op_ty
+
+and infer_bin env level op e1 e2 =
+  let open Result.Let_syntax in
+  let fun_ty = fun_ty_of_bin_op op in
+  let%bind t1 = infer env level e1 in
+  let%bind t2 = infer env level e2 in
+  let return_ty = Type.new_var level in
+  let%bind () = unify fun_ty (Type.Arr ([ t1; t2 ], return_ty)) in
+  Ok return_ty

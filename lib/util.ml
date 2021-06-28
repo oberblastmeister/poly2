@@ -1,5 +1,7 @@
 open Core
 
-exception Todo
+(** Throw an exception indicating that something is todo *)
+let todo = Error.of_string "Not implemented yet!" |> Error.raise
 
-exception Unreachable
+(** Throw an exception indicating that something should be unreachable *)
+let unreachable = Error.of_string "This should be unreachable!" |> Error.raise

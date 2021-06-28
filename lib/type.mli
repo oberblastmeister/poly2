@@ -15,6 +15,16 @@ type t = Unit | Con of string | Arr of t list * t | Var of tvar ref
 and tvar = Unbound of VarId.t * level | Link of t | Generic of VarId.t
 [@@deriving show, eq, sexp]
 
+val string_con : t
+
+val int_con : t
+
+val bool_con : t
+
+val int_op_ty : t
+
+val int_bool_op_ty : t
+
 val print : t -> unit
 
 val new_var : level -> t
