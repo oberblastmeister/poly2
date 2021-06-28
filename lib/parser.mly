@@ -1,6 +1,4 @@
 %{
-open Expr
-open Type
 %}
 
 %token <string> IDENT
@@ -29,35 +27,35 @@ expr_eof:
 
 expr:
   | LPAREN e = expr RPAREN { e }
-  | name = IDENT { Var name }
-  | LET name = IDENT ASSIGN e1 = expr IN e2 = expr { Let (name, e1, e2) }
+  | name = IDENT { Expr.Var name }
+  | LET name = IDENT ASSIGN e1 = expr IN e2 = expr { Expr.Let (name, e1, e2) }
   | lit { $1 }
   | bin { $1 }
   | neg { $1 }
 
 lit:
-  | i = INT { Lit (LInt i) }
-  | s = STRING { Lit (LString s) }
+  | i = INT { Expr.Lit (LInt i) }
+  | s = STRING { Expr.Lit (LString s) }
 
 bin:
-  | e1 = expr PLUS e2 = expr { Bin (Add, e1, e2) }
-  | e1 = expr MINUS e2 = expr { Bin (Sub, e1, e2) }
-  | e1 = expr STAR e2 = expr { Bin (Mul, e1, e2) }
-  | e1 = expr SLASH e2 = expr { Bin (Div, e1, e2) }
-  | e1 = expr EQUALS e2 = expr { Bin (Eq, e1, e2) }
-  | e1 = expr NOTEQUALS e2 = expr { Bin (NotEq, e1, e2) }
+  | e1 = expr PLUS e2 = expr { Bin (Expr.Add, e1, e2) }
+  | e1 = expr MINUS e2 = expr { Bin (Expr.Sub, e1, e2) }
+  | e1 = expr STAR e2 = expr { Bin (Expr.Mul, e1, e2) }
+  | e1 = expr SLASH e2 = expr { Bin (Expr.Div, e1, e2) }
+  | e1 = expr EQUALS e2 = expr { Bin (Expr.Eq, e1, e2) }
+  | e1 = expr NOTEQUALS e2 = expr { Bin (Expr.NotEq, e1, e2) }
 
 neg:
-  MINUS e = expr %prec UMINUS { Neg e }
+  MINUS e = expr %prec UMINUS { Expr.Neg e }
 
 ty_eof:
   t = ty EOF { t }
 
 ty:
-  | i = IDENT { TCon i }
-  | LPAREN RPAREN { Unit }
-  | t1 = ty ARROW t2 = ty { TArr ([t1], t2) }
-  | t1 = ty_comma_list ARROW t2 = ty { TArr (t1, t2) }
+  | i = IDENT { Type.Con i }
+  | LPAREN RPAREN { Type.Unit }
+  | t1 = ty ARROW t2 = ty { Type.Arr ([t1], t2) }
+  | t1 = ty_comma_list ARROW t2 = ty { Type.Arr (t1, t2) }
 
 ty_comma_list:
   LPAREN tys = separated_list(COMMA, ty) RPAREN { tys }

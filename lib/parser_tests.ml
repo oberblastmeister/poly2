@@ -68,7 +68,7 @@ module Type_tests = struct
 
   let%expect_test "unit" =
     parse_type "()" |> Type.print;
-    [%expect {| Type.Unit |}]
+    [%expect {| Type.TUnit |}]
 
   let%expect_test "arrow type" =
     parse_type "(String, Int, Bool) -> String" |> Type.print;
@@ -79,11 +79,11 @@ module Type_tests = struct
 
   let%expect_test "arrow type unit" =
     parse_type "() -> String" |> Type.print;
-    [%expect {| (Type.TArr ([Type.Unit], (Type.TCon "String"))) |}];
+    [%expect {| (Type.TArr ([Type.TUnit], (Type.TCon "String"))) |}];
 
     parse_type "String -> () -> ()" |> Type.print;
     [%expect
-      {| (Type.TArr ([(Type.TCon "String")], (Type.TArr ([Type.Unit], Type.Unit)))) |}]
+      {| (Type.TArr ([(Type.TCon "String")], (Type.TArr ([Type.TUnit], Type.TUnit)))) |}]
 
   let%expect_test "arrow type assoc correct" =
     parse_type "String -> Int -> String -> Bool" |> Type.print;

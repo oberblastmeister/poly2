@@ -2,23 +2,17 @@ open Core
 
 type level = int [@@deriving show, eq, sexp]
 
-module Unique : sig
-  type t
+module VarId : sig
+  type t [@@deriving sexp, hash]
 
-  include Comparable with type t := t
+  include Comparable.S with type t := t
 end
 
-type t =
-  | Unit
-  | TCon of string
-  | TApp of t * t list
-  | TArr of t list * t
-  | TVar of tvar ref
+type t = Unit | Con of string | Arr of t list * t | Var of tvar ref
 [@@deriving show, eq, sexp]
 
 (* include Equal.S with type t := t *)
-
-and tvar = Unbound of Unique.t * level | Link of t | Generic of Unique.t
+and tvar = Unbound of VarId.t * level | Link of t | Generic of VarId.t
 [@@deriving show, eq, sexp]
 
 val print : t -> unit
