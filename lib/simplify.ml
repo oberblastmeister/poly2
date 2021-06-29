@@ -16,7 +16,18 @@ let named_var_seq () =
   let%bind n = numbers_seq () in
   let n' = if n = 0 then "" else Int.to_string n in
   let%bind c = char_seq () in
-  String.(concat [ of_char c; n' ]) |> Type.Named |> return
+  String.(concat [ of_char c; n' ]) |> return
+
+module MakeNameSupply () : sig
+  val create : unit -> string
+end = struct
+  let seq = ref (named_var_seq ())
+
+  let create () =
+    let x, xs = Sequence.next !seq |> Option.value_exn in
+    seq := xs;
+    x
+end
 
 let%test_module _ =
   (module struct
@@ -80,8 +91,7 @@ let%test_module _ =
               create 1;
               create 2;
               create 3 |> Fn.flip List.take 4;
-            ]
-          >>| fun x -> Type.Named x)
+            ])
       in
       let actual =
         named_var_seq ()
@@ -89,5 +99,5 @@ let%test_module _ =
         |> Sequence.to_list
       in
 
-      [%test_result: Type.tvar list] actual ~expect
+      [%test_result: string list] actual ~expect
   end)

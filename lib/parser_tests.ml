@@ -1,108 +1,97 @@
 open Core
-open Parse
 
 module Expr_tests = struct
+  let test_expr s =
+    Parse.parse_expr s |> Expr.sexp_of_t |> Sexp.output_hum Out_channel.stdout
+
   let%expect_test "lit num" =
-    parse_expr "1234" |> Expr.print;
-    [%expect {| (Expr.Lit (Expr.LInt 1234)) |}]
+    test_expr "1234";
+    [%expect {| (Lit (LInt 1234)) |}]
 
   let%expect_test "add" =
-    parse_expr "1 + 1" |> Expr.print;
-    [%expect
-      {| (Expr.Bin (Expr.Add, (Expr.Lit (Expr.LInt 1)), (Expr.Lit (Expr.LInt 1)))) |}]
+    test_expr "1 + 1";
+    [%expect {| (Bin Add (Lit (LInt 1)) (Lit (LInt 1))) |}]
 
   let%expect_test "sub" =
-    parse_expr "12 - 13" |> Expr.print;
-    [%expect
-      {| (Expr.Bin (Expr.Sub, (Expr.Lit (Expr.LInt 12)), (Expr.Lit (Expr.LInt 13)))) |}]
+    test_expr "12 - 13";
+    [%expect {| (Bin Sub (Lit (LInt 12)) (Lit (LInt 13))) |}]
 
   let%expect_test "mul" =
-    parse_expr "1 * 0" |> Expr.print;
-    [%expect
-      {| (Expr.Bin (Expr.Mul, (Expr.Lit (Expr.LInt 1)), (Expr.Lit (Expr.LInt 0)))) |}]
+    test_expr "1 * 0";
+    [%expect {| (Bin Mul (Lit (LInt 1)) (Lit (LInt 0))) |}]
 
   let%expect_test "div" =
-    parse_expr "1 / 132" |> Expr.print;
-    [%expect
-      {| (Expr.Bin (Expr.Div, (Expr.Lit (Expr.LInt 1)), (Expr.Lit (Expr.LInt 132)))) |}]
+    test_expr "1 / 132";
+    [%expect {| (Bin Div (Lit (LInt 1)) (Lit (LInt 132))) |}]
 
   let%expect_test "string" =
-    parse_expr {| "a string" |} |> Expr.print;
-    [%expect {| (Expr.Lit (Expr.LString "a string")) |}]
+    test_expr {| "a string" |};
+    [%expect {| (Lit (LString "a string")) |}]
 
   let%expect_test "string with escapes" =
-    parse_expr {| "\t hello \n \n \" \'" |} |> Expr.print;
-    [%expect {| (Expr.Lit (Expr.LString "\t hello \n \n \" '")) |}]
-
-  let%expect_test "precedence correct" =
-    parse_expr "1 + 3 / 2" |> Expr.print;
+    test_expr {| "\t hello \n \n \" \'" |};
     [%expect
       {|
-    (Expr.Bin (Expr.Add, (Expr.Lit (Expr.LInt 1)),
-       (Expr.Bin (Expr.Div, (Expr.Lit (Expr.LInt 3)), (Expr.Lit (Expr.LInt 2))))
-       )) |}]
+      (Lit (LString  "\t hello \
+                    \n \
+                    \n \" '")) |}]
+
+  let%expect_test "precedence correct" =
+    test_expr "1 + 3 / 2";
+    [%expect
+      {|
+    (Bin Add (Lit (LInt 1)) (Bin Div (Lit (LInt 3)) (Lit (LInt 2)))) |}]
 
   let%expect_test "variable" =
-    parse_expr "a_variable" |> Expr.print;
-    [%expect {| (Expr.Var "a_variable") |}]
+    test_expr "a_variable";
+    [%expect {| (Var a_variable) |}]
 
   let%expect_test "let" =
-    parse_expr {|
+    test_expr {|
     let x = 324 in
     let y = "a string" in
     x + x
-    |}
-    |> Expr.print;
+    |};
     [%expect
       {|
-      (Expr.Let ("x", (Expr.Lit (Expr.LInt 324)),
-         (Expr.Let ("y", (Expr.Lit (Expr.LString "a string")),
-            (Expr.Bin (Expr.Add, (Expr.Var "x"), (Expr.Var "x")))))
-         )) |}]
+      (Let x (Lit (LInt 324))
+       (Let y (Lit (LString "a string")) (Bin Add (Var x) (Var x)))) |}]
 end
 
 module Type_tests = struct
+  let test_type s =
+    Parse.parse_type s |> Type.sexp_of_t |> Sexp.output_hum Out_channel.stdout
+
   let%expect_test "t con" =
-    parse_type "String" |> Type.print;
-    [%expect {| (Type.Con "String") |}]
+    test_type "String";
+    [%expect {| (Con String) |}]
 
   let%expect_test "unit" =
-    parse_type "()" |> Type.print;
-    [%expect {| Type.Unit |}]
+    test_type "()";
+    [%expect {| Unit |}]
 
   let%expect_test "arrow type" =
-    parse_type "(String, Int, Bool) -> String" |> Type.print;
-    [%expect
-      {|
-      (Type.Arr ([(Type.Con "String"); (Type.Con "Int"); (Type.Con "Bool")],
-         (Type.Con "String"))) |}]
+    test_type "(String, Int, Bool) -> String";
+    [%expect {|
+      (Arr ((Con String) (Con Int) (Con Bool)) (Con String)) |}]
 
   let%expect_test "arrow type unit" =
-    parse_type "() -> String" |> Type.print;
-    [%expect {| (Type.Arr ([Type.Unit], (Type.Con "String"))) |}];
+    test_type "() -> String";
+    [%expect {| (Arr (Unit) (Con String)) |}];
 
-    parse_type "String -> () -> ()" |> Type.print;
-    [%expect
-      {| (Type.Arr ([(Type.Con "String")], (Type.Arr ([Type.Unit], Type.Unit)))) |}]
+    test_type "String -> () -> ()";
+    [%expect {| (Arr ((Con String)) (Arr (Unit) Unit)) |}]
 
   let%expect_test "arrow type assoc correct" =
-    parse_type "String -> Int -> String -> Bool" |> Type.print;
+    test_type "String -> Int -> String -> Bool";
     [%expect
       {|
-      (Type.Arr ([(Type.Con "String")],
-         (Type.Arr ([(Type.Con "Int")],
-            (Type.Arr ([(Type.Con "String")], (Type.Con "Bool")))))
-         )) |}]
+      (Arr ((Con String)) (Arr ((Con Int)) (Arr ((Con String)) (Con Bool)))) |}]
 
   let%expect_test "arrow type assoc with parens" =
-    parse_type "(String -> Int) -> Bool -> (String -> Bool) -> String"
-    |> Type.print;
+    test_type "(String -> Int) -> Bool -> (String -> Bool) -> String";
     [%expect
       {|
-      (Type.Arr ([(Type.Arr ([(Type.Con "String")], (Type.Con "Int")))],
-         (Type.Arr ([(Type.Con "Bool")],
-            (Type.Arr ([(Type.Arr ([(Type.Con "String")], (Type.Con "Bool")))],
-               (Type.Con "String")))
-            ))
-         )) |}]
+      (Arr ((Arr ((Con String)) (Con Int)))
+       (Arr ((Con Bool)) (Arr ((Arr ((Con String)) (Con Bool))) (Con String)))) |}]
 end
