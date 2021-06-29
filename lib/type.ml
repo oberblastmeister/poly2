@@ -10,8 +10,17 @@ module VarId = struct
   let pp f t = Format.pp_print_string f (show t)
 end
 
+module Var = struct
+  type t =
+    | Unbound of VarId.t * level
+    | Link of t
+    | Generic of VarId.t
+    | Named of Expr.name
+  [@@deriving show, compare, equal, sexp]
+end
+
 type t = Unit | Con of string | Arr of t list * t | Var of tvar ref
-[@@deriving show, eq, sexp]
+[@@deriving show, compare, equal, sexp]
 
 and tvar =
   | Unbound of VarId.t * level

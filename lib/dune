@@ -6,6 +6,7 @@
  (preprocess
    (pps
      ppx_jane
+     ppx_compare
      ppx_deriving.show
      ppx_deriving.ord
      ppx_deriving.eq))
