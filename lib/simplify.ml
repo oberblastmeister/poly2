@@ -18,9 +18,11 @@ let named_var_seq () =
   let%bind c = char_seq () in
   String.(concat [ of_char c; n' ]) |> return
 
-module MakeNameSupply () : sig
+module type NAMESUPPLY = sig
   val create : unit -> string
-end = struct
+end
+
+module MakeNameSupply () : NAMESUPPLY = struct
   let seq = ref (named_var_seq ())
 
   let create () =
