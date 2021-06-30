@@ -86,4 +86,9 @@ let%test_module "pretty printing types" =
       [%test_result: string] ~expect:"b" (new_var () |> show);
       [%test_result: string] ~expect:"c" (new_var () |> show);
       [%test_result: string] ~expect:"d" (new_var () |> show)
+
+    let%test_unit "it should work after a lot of skipped variables" =
+      let open MakeTester () in
+      skip_var 136;
+      [%test_result: string] ~expect:"g5" (new_var () |> show)
   end)
