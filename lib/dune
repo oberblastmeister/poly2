@@ -2,7 +2,6 @@
  (name poly2)
  (inline_tests)
  (flags (:standard -warn-error -A))
- (modules_without_implementation type_intf)
  (preprocess
    (pps
      ppx_jane
