@@ -7,7 +7,8 @@
 (package
   (name poly2)
   (depends
-    (alcotest (= 1.4.0))
+    (core (= v0.14.1))
     (ppx_deriving (= 5.2.1))
     (fmt (= 0.8.9+dune))
-    (core (= v0.14.1))))
+    (alcotest (= 1.4.0))
+    (qcheck (= 0.17))))

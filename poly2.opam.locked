@@ -17,22 +17,24 @@ depends: [
   "core_kernel" {= "v0.14.1"}
   "cppo" {= "1.6.7"}
   "csexp" {= "1.5.1"}
-  "dune" {= "2.8.5"}
-  "dune-configurator" {= "2.8.5"}
+  "dune" {= "2.9.0"}
+  "dune-configurator" {= "2.9.0"}
   "fieldslib" {= "v0.14.0"}
   "findlib" {= "1.8.1+dune"}
   "fmt" {= "0.8.9+dune"}
   "jane-street-headers" {= "v0.14.0"}
   "jst-config" {= "v0.14.0"}
   "num" {= "1.3+dune"}
-  "ocaml" {= "4.12.1"}
+  "ocaml" {= "4.13.0"}
+  "ocaml-base-compiler" {= "4.13.0~alpha1"}
   "ocaml-compiler-libs" {= "v0.12.3"}
   "ocaml-config" {= "2"}
-  "ocaml-migrate-parsetree" {= "2.1.0"}
-  "ocaml-variants" {= "4.12.1+trunk"}
+  "ocaml-migrate-parsetree" {= "2.2.0"}
+  "ocaml-options-vanilla" {= "1"}
   "ocamlfind" {= "1.8.1+dune"}
   "octavius" {= "1.2.2"}
-  "parsexp" {= "v0.14.0"}
+  "ounit2" {= "2.2.4"}
+  "parsexp" {= "v0.14.1"}
   "ppx_assert" {= "v0.14.0"}
   "ppx_base" {= "v0.14.0"}
   "ppx_bench" {= "v0.14.1"}
@@ -50,10 +52,10 @@ depends: [
   "ppx_here" {= "v0.14.0"}
   "ppx_inline_test" {= "v0.14.1"}
   "ppx_jane" {= "v0.14.0"}
-  "ppx_js_style" {= "v0.14.0"}
+  "ppx_js_style" {= "v0.14.1"}
   "ppx_let" {= "v0.14.0"}
   "ppx_module_timer" {= "v0.14.0"}
-  "ppx_optcomp" {= "v0.14.1"}
+  "ppx_optcomp" {= "v0.14.2"}
   "ppx_optional" {= "v0.14.0"}
   "ppx_pipebang" {= "v0.14.0"}
   "ppx_sexp_conv" {= "v0.14.3"}
@@ -63,7 +65,10 @@ depends: [
   "ppx_string" {= "v0.14.1"}
   "ppx_typerep_conv" {= "v0.14.2"}
   "ppx_variants_conv" {= "v0.14.1"}
-  "ppxlib" {= "0.22.0"}
+  "ppxlib" {= "0.22.2"}
+  "qcheck" {= "0.17"}
+  "qcheck-core" {= "0.17"}
+  "qcheck-ounit" {= "0.17"}
   "re" {= "1.9.0"}
   "result" {= "1.5"}
   "seq" {= "base+dune"}
@@ -126,8 +131,8 @@ pin-depends: [
     "https://github.com/ocaml-dune/csexp/releases/download/1.5.1/csexp-1.5.1.tbz"
   ]
   [
-    "dune-configurator.2.8.5"
-    "https://github.com/ocaml/dune/releases/download/2.8.5/dune-2.8.5.tbz"
+    "dune-configurator.2.9.0"
+    "https://github.com/ocaml/dune/releases/download/2.9.0/dune-2.9.0.tbz"
   ]
   [
     "fieldslib.v0.14.0"
@@ -158,8 +163,8 @@ pin-depends: [
     "https://github.com/janestreet/ocaml-compiler-libs/releases/download/v0.12.3/ocaml-compiler-libs-v0.12.3.tbz"
   ]
   [
-    "ocaml-migrate-parsetree.2.1.0"
-    "https://github.com/ocaml-ppx/ocaml-migrate-parsetree/releases/download/v2.1.0/ocaml-migrate-parsetree-v2.1.0.tbz"
+    "ocaml-migrate-parsetree.2.2.0"
+    "https://github.com/ocaml-ppx/ocaml-migrate-parsetree/releases/download/v2.2.0/ocaml-migrate-parsetree-v2.2.0.tbz"
   ]
   [
     "ocamlfind.1.8.1+dune"
@@ -170,8 +175,12 @@ pin-depends: [
     "https://github.com/ocaml-doc/octavius/archive/v1.2.2.tar.gz"
   ]
   [
-    "parsexp.v0.14.0"
-    "https://ocaml.janestreet.com/ocaml-core/v0.14/files/parsexp-v0.14.0.tar.gz"
+    "ounit2.2.2.4"
+    "https://github.com/gildor478/ounit/releases/download/v2.2.4/ounit-v2.2.4.tbz"
+  ]
+  [
+    "parsexp.v0.14.1"
+    "https://github.com/janestreet/parsexp/archive/refs/tags/v0.14.1.tar.gz"
   ]
   [
     "ppx_assert.v0.14.0"
@@ -242,8 +251,8 @@ pin-depends: [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/ppx_jane-v0.14.0.tar.gz"
   ]
   [
-    "ppx_js_style.v0.14.0"
-    "https://ocaml.janestreet.com/ocaml-core/v0.14/files/ppx_js_style-v0.14.0.tar.gz"
+    "ppx_js_style.v0.14.1"
+    "https://github.com/janestreet/ppx_js_style/archive/refs/tags/v0.14.1.tar.gz"
   ]
   [
     "ppx_let.v0.14.0"
@@ -254,8 +263,8 @@ pin-depends: [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/ppx_module_timer-v0.14.0.tar.gz"
   ]
   [
-    "ppx_optcomp.v0.14.1"
-    "https://github.com/janestreet/ppx_optcomp/archive/v0.14.1.tar.gz"
+    "ppx_optcomp.v0.14.2"
+    "https://github.com/janestreet/ppx_optcomp/archive/v0.14.2.tar.gz"
   ]
   [
     "ppx_optional.v0.14.0"
@@ -294,8 +303,13 @@ pin-depends: [
     "https://github.com/janestreet/ppx_variants_conv/archive/v0.14.1.tar.gz"
   ]
   [
-    "ppxlib.0.22.0"
-    "https://github.com/ocaml-ppx/ppxlib/releases/download/0.22.0/ppxlib-0.22.0.tbz"
+    "ppxlib.0.22.2"
+    "https://github.com/ocaml-ppx/ppxlib/releases/download/0.22.2/ppxlib-0.22.2.tbz"
+  ]
+  ["qcheck.0.17" "https://github.com/c-cube/qcheck/archive/0.17.tar.gz"]
+  ["qcheck-core.0.17" "https://github.com/c-cube/qcheck/archive/0.17.tar.gz"]
+  [
+    "qcheck-ounit.0.17" "https://github.com/c-cube/qcheck/archive/0.17.tar.gz"
   ]
   [
     "re.1.9.0"
@@ -361,6 +375,14 @@ pin-depends: [
 ]
 x-opam-monorepo-duniverse-dirs: [
   [
+    "https://github.com/c-cube/qcheck/archive/0.17.tar.gz"
+    "qcheck"
+    [
+      "md5=605165edc328ae144341a2d73c7fc5fc"
+      "sha512=647c1beefba8fce32daac91bd42976ddf2926cff2e78e43ac3afb6e59ec660f0f6e684f5954d6b1fab6d11328690b236e40c30980a22a999c4b826ae2a0dcaea"
+    ]
+  ]
+  [
     "https://github.com/c-cube/seq/archive/0.2.2.tar.gz"
     "seq"
     [
@@ -425,6 +447,14 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
+    "https://github.com/gildor478/ounit/releases/download/v2.2.4/ounit-v2.2.4.tbz"
+    "ounit"
+    [
+      "sha256=b5c069a5d957220ca0669e945f1e81e6b6db9622766d860913e136e1168e3345"
+      "sha512=d69dc501a360c31f7854322b5e2c2abcb1e43890737e1cc00c167ee104d5dee471b6b8d8186f8044b0482c91a8f15210a25d833a1e03ed7baabfba923815962f"
+    ]
+  ]
+  [
     "https://github.com/janestreet/base/archive/v0.14.1.tar.gz"
     "base"
     ["md5=e4419eae60f57e553b154856f0cacf42"]
@@ -453,6 +483,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
+    "https://github.com/janestreet/parsexp/archive/refs/tags/v0.14.1.tar.gz"
+    "parsexp"
+    ["md5=e6659d53f4d94de8979e05d17222b753"]
+  ]
+  [
     "https://github.com/janestreet/ppx_bench/archive/v0.14.1.tar.gz"
     "ppx_bench"
     ["md5=f2852170a6396d60d4fc1c156be1ec62"]
@@ -478,9 +513,14 @@ x-opam-monorepo-duniverse-dirs: [
     ["md5=132754f0757188c3b700a2c5b6a2fb3f"]
   ]
   [
-    "https://github.com/janestreet/ppx_optcomp/archive/v0.14.1.tar.gz"
+    "https://github.com/janestreet/ppx_js_style/archive/refs/tags/v0.14.1.tar.gz"
+    "ppx_js_style"
+    ["md5=2d79afa4f954aeafb81b64ecfc11c3fb"]
+  ]
+  [
+    "https://github.com/janestreet/ppx_optcomp/archive/v0.14.2.tar.gz"
     "ppx_optcomp"
-    ["md5=4ba24037b097bfedbbeb5a5c577694e1"]
+    ["md5=2c8abde792ba4b8868e7dfb5afb3e1c5"]
   ]
   [
     "https://github.com/janestreet/ppx_sexp_conv/archive/v0.14.3.tar.gz"
@@ -552,11 +592,11 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/ocaml-ppx/ocaml-migrate-parsetree/releases/download/v2.1.0/ocaml-migrate-parsetree-v2.1.0.tbz"
+    "https://github.com/ocaml-ppx/ocaml-migrate-parsetree/releases/download/v2.2.0/ocaml-migrate-parsetree-v2.2.0.tbz"
     "ocaml-migrate-parsetree"
     [
-      "sha256=387b788ee4c0537f1fe02c25e05f0335af424828fc6fe940acc0db5948a5a71f"
-      "sha512=6ac80face6b77531c8d89a77d7a246bd5d43da435c355f62c03c8b8e360e1d7e339c904709fd3dbc9aa340c86ada9a69d5ebcf97cbdb7bd51bec97f831741b99"
+      "sha256=b2a68f3d3899cec3a50a99b05738295cc8a18672680406d0f68fbc95c01f1ba1"
+      "sha512=d1a6e2a639f77d297690f9ed79318b7a403444585b062d2add9f370320f735ba54bca191a34401f15c576c7ee55b5ed232f20d9599aa67821c747d7e684fc5a7"
     ]
   ]
   [
@@ -573,19 +613,19 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "https://github.com/ocaml-ppx/ppxlib/releases/download/0.22.0/ppxlib-0.22.0.tbz"
+    "https://github.com/ocaml-ppx/ppxlib/releases/download/0.22.2/ppxlib-0.22.2.tbz"
     "ppxlib"
     [
-      "sha256=3eeb91e03966662284a3222e612dee7f4fa2b7637c53d9572d2a74134bb96d7a"
-      "sha512=425051dff9df53579a6edd17369d66c10f87a78daeddf1691e50997990ed643e874fcc6a30112a4dacbfd2d0097a19445354e04cd920d9522f76c51cdbc7f1db"
+      "sha256=d0e8a1ebdc6220b1574d7a926f008460c5118ccef79bf9a0ce0242f34cff225a"
+      "sha512=6010a59be6af873eaf193670f9cc8c9a7f091cfd89ec6c5b68d1f0c72d7c6015eec6371c009fc473cf2cb37d24f0934d04d0eacefa567a4945234197c3b31741"
     ]
   ]
   [
-    "https://github.com/ocaml/dune/releases/download/2.8.5/dune-2.8.5.tbz"
+    "https://github.com/ocaml/dune/releases/download/2.9.0/dune-2.9.0.tbz"
     "dune_"
     [
-      "sha256=79011283fb74c7a27eb17ad752efbcc39b39633cbacc8d7be97e8ea869443629"
-      "sha512=4ef6cdea0768a29de0108cb61b04ef471cb494762c865265f20d7d15ed65a39557f7e34f2dbd466352a6567cce29d7ba21be6569afafbcfc2871720b9466dcae"
+      "sha256=bb217cfb17e893a0b1eb002ac83c14f96adc9d0703cb51ff34ed3ef5a639a41e"
+      "sha512=fcd8bc3ea7e9a14e6787a3b0384a488e45fa51e164a175ad1b147bebb3fbcccfd8f321b9b6a7665ac3dafeb18a2a6f8626d182af3b1796691f6ed79c166a5f44"
     ]
   ]
   [
@@ -625,11 +665,6 @@ x-opam-monorepo-duniverse-dirs: [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/jst-config-v0.14.0.tar.gz"
     "jst-config"
     ["md5=eefbac104a59bf90c82992cc9fb487d5"]
-  ]
-  [
-    "https://ocaml.janestreet.com/ocaml-core/v0.14/files/parsexp-v0.14.0.tar.gz"
-    "parsexp"
-    ["md5=c2c5fa3f9b082e4fe729e2cf95cacd3b"]
   ]
   [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/ppx_assert-v0.14.0.tar.gz"
@@ -680,11 +715,6 @@ x-opam-monorepo-duniverse-dirs: [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/ppx_jane-v0.14.0.tar.gz"
     "ppx_jane"
     ["md5=ce8e39f9fe7ddcaf821e468a27766083"]
-  ]
-  [
-    "https://ocaml.janestreet.com/ocaml-core/v0.14/files/ppx_js_style-v0.14.0.tar.gz"
-    "ppx_js_style"
-    ["md5=eab9c17616a2ba4cbd69a88db76070fd"]
   ]
   [
     "https://ocaml.janestreet.com/ocaml-core/v0.14/files/ppx_let-v0.14.0.tar.gz"

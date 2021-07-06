@@ -1,2 +1,4 @@
-(test
- (name poly2))
+(tests
+ (names pretty)
+ (flags (:standard -warn-error -A))
+ (libraries alcotest qcheck poly2))

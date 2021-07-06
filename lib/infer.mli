@@ -14,4 +14,4 @@ module Error : sig
   [@@deriving show, eq]
 end
 
-val infer : Env.t -> Type.level -> Expr.t -> (Type.t, [> Error.t ]) result
+val infer : Env.t -> Type.level -> Id_supply.t -> Expr.t -> (Type.t, [> Error.t ]) result
