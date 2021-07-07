@@ -8,7 +8,11 @@ type t = Unit | Con of string | Arr of t list * t | Var of tvar ref
 and tvar = Unbound of int * level | Link of t | Generic of int
 [@@deriving compare, equal, sexp]
 
+type forall_naive = { forall : Expr.name list; ty : t }
+
 val pp : t Fmt.t
+
+val pp_sexp : t Fmt.t
 
 val pp_tvar : tvar Fmt.t
 

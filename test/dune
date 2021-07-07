@@ -1,4 +1,4 @@
 (tests
- (names pretty infer)
+ (names pretty infer test_utils)
  (flags (:standard -warn-error -A))
  (libraries alcotest qcheck poly2))

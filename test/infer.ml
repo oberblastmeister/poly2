@@ -1,42 +1,49 @@
 open Core
 open Poly2
 open Type
+open Infer
+open Test_utils
 
-let infer = Infer.infer
+let ty_testable = Alcotest.testable Type.pp_sexp Type.equal
 
-let test name = Alcotest.test_case name `Quick
-
-let ty_testable =
-  Alcotest.testable Infer.Res.pp (Infer.Res.equal_t' Infer.Error.equal)
+let ty_res_testable = Alcotest.testable Infer.Res.pp_sexp Infer.Res.equal
 
 let check_infer ?(name = "") ty expected =
   let actual = infer ty in
-  Alcotest.(check ty_testable) name actual expected
+  Alcotest.(check ty_res_testable) name expected actual
 
-let new_var = (Fn.flip new_var) 0
+let check_infer_poly ?(name = "") expr_s expected_s =
+  let actual = infer_poly (Parse.parse_expr expr_s) in
+  let expected =
+    Result.map expected_s ~f:(Fn.compose generalize Parse.parse_type)
+  in
+  Alcotest.(check ty_res_testable) name expected actual
 
-module TestSetup () = struct
-  let supply = Id_supply.create ()
-
-  let a = new_var supply
-
-  let b = new_var supply
-
-  let c = new_var supply
-
-  let d = new_var supply
-
-  let e = new_var supply
-end
+let check_gen ?(name = "") ty expected =
+  let actual = generalize ty in
+  Alcotest.(check ty_testable) name expected actual
 
 let function_tests =
   let open TestSetup () in
   [
     test "simple functions" (fun () ->
-        check_infer (Fun ([ "x" ], Var "x")) (Ok (Arr ([ a ], a)));
+        check_infer_poly ~name:"id" "fun x -> x" (Ok "a -> a");
+        check_infer_poly ~name:"apply" "fun f -> fun x -> f x"
+          (Ok "(a -> b) -> a -> b"));
+    (* (Fun ([ "f" ], Fun ([ "x" ], Call (Var "f", [ Var "x" ])))) *)
+    (* (Fun ([ "f"; "x" ], Call (Var "f", [ Var "x" ]))) *)
+    (* (Ok (Arr ([ ]))) ()); *)
+  ]
+
+let generalize_tests =
+  let open TestSetup () in
+  [
+    test "simple vars" (fun () ->
+        check_gen a' (Var (ref (Generic 0)));
         ());
   ]
 
 let () =
   let open Alcotest in
-  run "type inference" [ ("functions", function_tests) ]
+  run "type inference"
+    [ ("functions", function_tests); ("generalization", generalize_tests) ]

@@ -15,6 +15,7 @@ let next_line lexbuf =
 
 let white = [' ' '\t' '\r']
 let ident = ['_' 'A'-'Z' 'a'-'z'] ['_' 'A'-'Z' 'a'-'z' '0'-'9']*
+let var_ident = ['\''] ident
 let digit = ['0'-'9']
 let integer = digit+
 
@@ -27,6 +28,7 @@ rule token = parse
 	| white+ { token lexbuf }
   | '\n' { next_line lexbuf; token lexbuf }
   | integer { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | var_ident { VARIDENT (Lexing.lexeme lexbuf) }
   | ident { IDENT (Lexing.lexeme lexbuf) }
 
   | '(' { LPAREN }
@@ -43,6 +45,7 @@ rule token = parse
   | '/' { SLASH }
   | '*' { STAR }
   | ',' { COMMA }
+  | '.' { DOT }
 
   | '"' { token_string (Buffer.create 17) lexbuf }
 

@@ -34,7 +34,7 @@ module Error = struct
     | `UnboundVariable of Expr.name
     | `UnexpectedNumArgs of int
     | `NotFunction ]
-  [@@deriving equal]
+  [@@deriving equal, compare, sexp]
 
   let pp f =
     let open Fmt in
@@ -46,22 +46,28 @@ module Error = struct
     | `UnexpectedNumArgs n -> pf f "Unexpected number of arguments %d" n
     | `NotFunction -> pf f "It was not a function"
 
+  let pp_sexp f t = sexp_of_t t |> Sexp.pp_hum f
+
   let show = Fmt.str "%a" pp
 end
 
 module Res = struct
   open Result
 
-  let equal_result = Result.equal
+  type 'a t' = (Type.t, ([> Error.t ] as 'a)) Result.t
 
-  let compare_result = Result.compare
-
-  type 'a t' = (Type.t, 'a) result [@@deriving equal, compare]
-
-  type 'a t = (Type.t, ([> Error.t ] as 'a)) result
+  type t = (Type.t, Error.t) Result.t [@@deriving equal, compare, sexp]
 
   let pp f = function Ok ty -> Type.pp f ty | Error e -> Error.pp f e
+
+  let pp_sexp f = function
+    | Ok ty -> Type.pp_sexp f ty
+    | Error e -> Error.pp_sexp f e
 end
+
+let start = 1
+
+let expr_level = 0
 
 let occurs_check_adjust_levels tvar_id tvar_level ty =
   let open Result.Let_syntax in
@@ -100,22 +106,33 @@ let rec unify t1 t2 =
   | ( Type.Var { contents = Type.Unbound (id1, _) },
       Type.Var { contents = Type.Unbound (id2, _) } )
     when id1 = id2 ->
-      assert false
-      (* There is only a single instance of a particular type variable. *)
-  | ty, Type.Var ({ contents = Type.Unbound (id, level) } as tvar) ->
+      let open Core.Error in
+      of_string "There is only a single instance of a particular type variable."
+      |> raise
+  | ty, Type.Var ({ contents = Type.Unbound (id, level) } as tvar)
+  | Type.Var ({ contents = Unbound (id, level) } as tvar), ty ->
       let%map () = occurs_check_adjust_levels id level ty in
       tvar := Link ty
+  | ( Type.Var { contents = Type.Generic id },
+      Type.Var { contents = Type.Generic id' } ) ->
+      if id = id' then
+        let open Core.Error in
+        of_string
+          "There can only be a single instance of a particular generic type \
+           variable."
+        |> raise
+      else Ok ()
   | _ -> Error (`UnificationFail (t1, t2))
 
-let rec generalize level = function
+let rec generalize_with level = function
   | Type.Var { contents = Type.Unbound (id, other_level) }
     when other_level > level ->
       Type.Var (ref (Type.Generic id))
   | Type.Arr (param_ty_list, return_ty) ->
       Type.Arr
-        ( List.map param_ty_list ~f:(generalize level),
-          generalize level return_ty )
-  | Type.Var { contents = Type.Link ty } -> generalize level ty
+        ( List.map param_ty_list ~f:(generalize_with level),
+          generalize_with level return_ty )
+  | Type.Var { contents = Type.Link ty } -> generalize_with level ty
   | ( Type.Var { contents = Type.Generic _ }
     | Type.Var { contents = Type.Unbound _ }
     | Type.Con _ | Type.Unit ) as ty ->
@@ -175,7 +192,7 @@ let rec infer_with env level supply =
       Type.Arr (param_ty_list, return_ty)
   | Expr.Let (var_name, value, body) ->
       let%bind var_ty = infer_with env (level + 1) supply value in
-      let generalized = generalize level var_ty in
+      let generalized = generalize_with level var_ty in
       infer_with (Env.extend env var_name generalized) level supply body
   | Expr.Call (fn, arg_list) ->
       let%bind fn_ty = infer_with env level supply fn in
@@ -216,4 +233,11 @@ and infer_bin env level op e1 e2 supply =
   let%bind () = unify fun_ty (Type.Arr ([ t1; t2 ], return_ty)) in
   Ok return_ty
 
-let infer = infer_with (Env.empty ()) 0 (Id_supply.create ())
+let infer = infer_with (Env.empty ()) start (Id_supply.create ())
+
+let infer_poly expr =
+  let open Result.Let_syntax in
+  let%map ty = infer expr in
+  generalize_with expr_level ty
+
+let generalize = generalize_with expr_level

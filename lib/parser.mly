@@ -2,11 +2,12 @@
 %}
 
 %token <string> IDENT
+%token <string> VARIDENT
 %token <string> STRING
 %token <int> INT
 %token LET FUN IN FORALL
 %token LPAREN RPAREN LBRACKET RBRACKET
-%token ARROW ASSIGN EQUALS NOTEQUALS COMMA
+%token ARROW ASSIGN EQUALS NOTEQUALS COMMA DOT
 %token PLUS MINUS STAR SLASH
 %token EOF
 
@@ -19,19 +20,37 @@
 
 %start <Expr.t> expr_eof
 %start <Type.t> ty_eof
+%start <Type.forall_naive> ty_forall_eof
 
 %%
 
 expr_eof:
-  e = expr EOF { e }
+  expr EOF { $1 }
+
+ty_forall_eof:
+  ty_forall EOF { $1 }
+
+ty_eof:
+  ty EOF { $1 }
 
 expr:
   | LPAREN e = expr RPAREN { e }
   | name = IDENT { Expr.Var name }
   | LET name = IDENT ASSIGN e1 = expr IN e2 = expr { Expr.Let (name, e1, e2) }
+  | func { $1 }
+  | call { $1 }
   | lit { $1 }
   | bin { $1 }
   | neg { $1 }
+
+func:
+  | FUN args = ident_list ARROW ret = expr { Expr.Fun (args, ret) }
+
+ident_list:
+  | nonempty_list(IDENT) { $1 }
+
+call:
+  | e = expr LPAREN args = separated_list(COMMA, expr) RPAREN { Call (e, args) }
 
 lit:
   | i = INT { Expr.Lit (LInt i) }
@@ -48,9 +67,6 @@ bin:
 neg:
   MINUS e = expr %prec UMINUS { Expr.Neg e }
 
-ty_eof:
-  t = ty EOF { t }
-
 ty:
   | i = IDENT { Type.Con i }
   | LPAREN RPAREN { Type.Unit }
@@ -59,3 +75,7 @@ ty:
 
 ty_comma_list:
   LPAREN tys = separated_list(COMMA, ty) RPAREN { tys }
+
+ty_forall:
+  | ty { { forall = []; ty = $1 } }
+  | FORALL tcons = ident_list DOT t = ty { { forall = tcons; ty = t } }

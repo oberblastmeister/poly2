@@ -8,7 +8,15 @@ type t = Unit | Con of string | Arr of t list * t | Var of tvar ref
 and tvar = Unbound of int * level | Link of t | Generic of int
 [@@deriving compare, equal, sexp]
 
+type forall_naive = { forall : Expr.name list; ty : t }
+
+let test { forall; ty } = (forall, ty)
+
 let is_arr = function Arr _ -> true | _ -> false
+
+let pp_sexp f t =
+  let sexp = sexp_of_t t in
+  Sexp.pp_hum f sexp
 
 module PP = struct
   open Fmt
@@ -47,7 +55,7 @@ module PP = struct
     let (module NameSupply : Simplify.NAMESUPPLY) = names in
     let create_or_add = Hashtbl.find_or_add ~default:NameSupply.create in
     function
-    | Unbound (id, _) -> pf f "%s" (create_or_add id_name_map id)
+    | Unbound (id, _) -> pf f "_%s" (create_or_add id_name_map id)
     | Link t -> pf f "%a" (pp' names id_name_map) t
     | Generic id -> pf f "%s" (create_or_add id_name_map id)
 
@@ -99,12 +107,12 @@ let%test_module "pretty printing types" =
     let%test_unit "it should work after a lot of skipped variables" =
       let id_supply = Id_supply.create () in
       Id_supply.skip_n id_supply 136;
-      [%test_result: string] ~expect:"a" (new_var id_supply |> show);
+      [%test_result: string] ~expect:"_a" (new_var id_supply |> show);
       [%test_result: t] ~expect:(var 138) (new_var id_supply)
 
     let%test_unit "it should print arrows properly" =
       let id_supply = Id_supply.create () in
       let a = new_var id_supply in
       let b = new_var id_supply in
-      [%test_result: string] ~expect:"(a, b) -> a" (Arr ([ a; b ], a) |> show)
+      [%test_result: string] ~expect:"(_a, _b) -> _a" (Arr ([ a; b ], a) |> show)
   end)

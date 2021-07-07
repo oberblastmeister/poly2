@@ -57,6 +57,10 @@ let%test_module "exprs" =
         {|
       (Let x (Lit (LInt 324))
        (Let y (Lit (LString "a string")) (Bin Add (Var x) (Var x)))) |}]
+
+    let%expect_test "simple function" =
+      test_expr "fun x -> x";
+      [%expect {| (Fun (x) (Var x)) |}]
   end)
 
 let%test_module "types" =
