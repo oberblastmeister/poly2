@@ -35,7 +35,7 @@ let variable_tests =
     test "arrows" (fun () ->
         let open TestSetup () in
         check_pp ~name:"it should normalize jumps"
-          (Arr ([ a; c ], d))
+(Arr ([ a; c ], d))
           "(a, b) -> c";
 
         check_pp ~name:"it should normalize offset for multi arr"
@@ -49,11 +49,6 @@ let variable_tests =
         check_pp ~name:"it should get assoc correct with multiargs"
           (Arr ([ Arr ([ c; c; Arr ([ e ], e) ], d); b; Arr ([ a ], b) ], e))
           "(((a, a, (b -> b)) -> c), d, (e -> d)) -> b");
-    (* test "con" (fun () -> *)
-    (*   QCheck.Test.make ~name:"con is always it's literal string" *)
-    (*     QCheck.( *)
-    (*     check_pp (Con "String") "String"; *)
-    (*     ()); *)
   ]
 
 let () =

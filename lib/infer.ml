@@ -1,4 +1,3 @@
-open Util
 open Core
 
 module type ENV = sig
@@ -6,7 +5,7 @@ module type ENV = sig
 
   type t
 
-  val empty : t
+  val empty : unit -> t
 
   val extend : t -> Expr.name -> Type.t -> t
 
@@ -18,7 +17,7 @@ module Env : ENV = struct
 
   type t = Type.t StringMap.t
 
-  let empty = StringMap.empty
+  let empty () = StringMap.empty
 
   let extend env name ty =
     match StringMap.add env ~key:name ~data:ty with
@@ -35,7 +34,7 @@ module Error = struct
     | `UnboundVariable of Expr.name
     | `UnexpectedNumArgs of int
     | `NotFunction ]
-  [@@deriving eq]
+  [@@deriving equal]
 
   let pp f =
     let open Fmt in
@@ -50,11 +49,25 @@ module Error = struct
   let show = Fmt.str "%a" pp
 end
 
+module Res = struct
+  open Result
+
+  let equal_result = Result.equal
+
+  let compare_result = Result.compare
+
+  type 'a t' = (Type.t, 'a) result [@@deriving equal, compare]
+
+  type 'a t = (Type.t, ([> Error.t ] as 'a)) result
+
+  let pp f = function Ok ty -> Type.pp f ty | Error e -> Error.pp f e
+end
+
 let occurs_check_adjust_levels tvar_id tvar_level ty =
   let open Result.Let_syntax in
   let rec f = function
     | Type.Var { contents = Type.Link ty } -> f ty
-    | Type.Var { contents = Type.Generic _ } -> unreachable ()
+    | Type.Var { contents = Type.Generic _ } -> Util.unreachable ()
     | Type.Var
         ({ contents = Type.Unbound (other_id, other_level) } as other_tvar) ->
         if other_id = tvar_id then Error `RecursiveTypes
@@ -117,7 +130,7 @@ let instantiate level ty supply =
     | Type.Var { contents = Type.Generic id } ->
         Hashtbl.find_or_add id_var_map id ~default:(fun () ->
             Type.new_var supply level)
-    | Type.Var { contents = Type.Unbound _ } -> (* ty *) Util.todo ()
+    | Type.Var { contents = Type.Unbound _ } -> ty
     | Type.Arr (param_ty_list, return_ty) ->
         Type.Arr (List.map param_ty_list ~f, f return_ty)
     | Type.Con _ -> (ty : Type.t)
@@ -142,7 +155,7 @@ let rec match_fun_ty num_params supply = function
       Ok (param_ty_list, return_ty)
   | _ -> Error `NotFunction
 
-let rec infer env level supply =
+let rec infer_with env level supply =
   let open Result.Let_syntax in
   function
   | Expr.Var name ->
@@ -158,21 +171,21 @@ let rec infer env level supply =
         List.fold2_exn param_list param_ty_list ~init:env
           ~f:(fun env param_name param_ty -> Env.extend env param_name param_ty)
       in
-      let%map return_ty = infer fn_env level supply body_expr in
+      let%map return_ty = infer_with fn_env level supply body_expr in
       Type.Arr (param_ty_list, return_ty)
   | Expr.Let (var_name, value, body) ->
-      let%bind var_ty = infer env (level + 1) supply value in
+      let%bind var_ty = infer_with env (level + 1) supply value in
       let generalized = generalize level var_ty in
-      infer (Env.extend env var_name generalized) level supply body
+      infer_with (Env.extend env var_name generalized) level supply body
   | Expr.Call (fn, arg_list) ->
-      let%bind fn_ty = infer env level supply fn in
+      let%bind fn_ty = infer_with env level supply fn in
       let%bind param_ty_list, return_ty =
         match_fun_ty (List.length arg_list) supply fn_ty
       in
       let%bind () =
         List_ext.iter_result2 param_ty_list arg_list
           ~f:(fun param_ty arg_expr ->
-            let%bind arg_ty = infer env level supply arg_expr in
+            let%bind arg_ty = infer_with env level supply arg_expr in
             unify param_ty arg_ty)
       in
 
@@ -181,7 +194,7 @@ let rec infer env level supply =
   | Expr.Unit -> Ok Type.Unit
   | Expr.Bin (op, t1, t2) -> infer_bin env level op t1 t2 supply
   | Expr.Neg e ->
-      let%bind t = infer env level supply e in
+      let%bind t = infer_with env level supply e in
       let%bind () = unify t Type.int_con in
       Ok Type.int_con
 
@@ -197,8 +210,10 @@ and fun_ty_of_bin_op = function
 and infer_bin env level op e1 e2 supply =
   let open Result.Let_syntax in
   let fun_ty = fun_ty_of_bin_op op in
-  let%bind t1 = infer env level supply e1 in
-  let%bind t2 = infer env level supply e2 in
+  let%bind t1 = infer_with env level supply e1 in
+  let%bind t2 = infer_with env level supply e2 in
   let return_ty = Type.new_var supply level in
   let%bind () = unify fun_ty (Type.Arr ([ t1; t2 ], return_ty)) in
   Ok return_ty
+
+let infer = infer_with (Env.empty ()) 0 (Id_supply.create ())
